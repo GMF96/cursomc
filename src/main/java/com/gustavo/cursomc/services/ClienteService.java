@@ -53,7 +53,7 @@ public class ClienteService {
 	private String prefix;
 	
 	@Value("${img.profile.size}")
-	private Integer size;
+	private Integer	 size;
 	
 	public Cliente find(Integer id) {
 		
@@ -93,6 +93,20 @@ public class ClienteService {
 	
 	public List<Cliente> findAll() {
 		return repo.findAll();
+	}
+	
+	public Cliente findByEmail(String email) {
+		
+		UserSecurity user = UserService.authenticated();
+		if (user==null || !user.hasRole(Perfil.ADMIN) && !email.equals(user.getUsername())) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		
+		Cliente obj = repo.findByEmail(email);
+		if (obj==null) {
+			throw new ObjectNotFoundException("Objeto não encontrado! Id: " + user.getId() + "Tipo: " + Cliente.class.getName());
+		}
+		return obj;
 	}
 	
 	public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
